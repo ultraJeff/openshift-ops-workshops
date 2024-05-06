@@ -140,22 +140,24 @@ NOTE: If you see a "Cluster is pending import" message on this page, your cluste
 
 Your environment came pre-loaded with an existing Hosted Control Plane Cluster hosted in AWS called *development*, we will be deploying an application to this cluster.
 
-Application Lifecycle functionality in RHACM provides the processes that are used to manage application resources on your managed clusters. This allows you to define a single or multi-cluster application using Kubernetes specifications, but with additional automation of the deployment and lifecycle management of resources to individual clusters. An application designed to run on a single cluster is straightforward and something you ought to be familiar with from working with OpenShift fundamentals. A multi-cluster application allows you to orchestrate the deployment of these same resources to multiple clusters, based on a set of rules you define for which clusters run the application components.
+Application Lifecycle functionality in RHACM provides the processes to manage application resources on your managed clusters. This allows you to define a single or multi-cluster application using Kubernetes specifications but with additional automation of the deployment and lifecycle management of resources to individual clusters. An application designed to run on a single cluster is straightforward and something you ought to be familiar with from working with OpenShift fundamentals. A multi-cluster application allows you to orchestrate deploying these same resources to multiple clusters based on a set of rules you define for which clusters run the application components.
 
 This table describes the different components that the Application Lifecycle model in RHACM is composed of:
+
 
 |===
 |*Resource*|*Purpose *
 
 |Channel|Defines a place where deployable resources are stored, such as an object store, Kubernetes namespace, Helm repository, or GitHub repository.
-|Subscription|Definitions that identify deployable resources available in a Channel resource that are to be deployed to a target cluster.
-|PlacementRule|Defines the target clusters where subscriptions deploy and maintain the application. It is composed of Kubernetes resources identified by the Subscription resource and pulled from the location defined in the Channel resource.
+|Subscription|Definitions that identify deployable resources available in a Channel resource to be deployed to a target cluster.
+|Placement or PlacementRule|Defines the target clusters where subscriptions deploy and maintain the application. It comprises Kubernetes resources identified by the Subscription resource and pulled from the location defined in the Channel resource.
 |Application|A way to group the components here into a more easily viewable single resource. An Application resource typically references a Subscription resource.
 |===
 
-These are all Kubernetes custom resources, defined by a Custom Resource Definition (CRD), that are created for you when RHACM is installed. By creating these as Kubernetes native objects, you can interact with them the same way you would with a Pod. For instance, running +oc get application+ retrieves a list of deployed RHACM applications just as +oc get pods+ retrieves a list of deployed Pods.
 
-This may seem like a lot of extra resources to manage in addition to the deployables that actually make up your application. However, they make it possible to automate the composition, placement, and overall control of your applications when you are deploying to many clusters. With a single cluster, it is easy to log in and run +oc create -f…​.+ If you need to do that on a dozen clusters, you want to make sure you do not make a mistake or miss a cluster, and you need a way to schedule and orchestrate updates to your applications. Leveraging the Application Lifecycle Builder in RHACM allows you to easily manage multi-cluster applications.
+These are all Kubernetes custom resources, defined by a Custom Resource Definition (CRD), created for you when RHACM is installed. By creating these as Kubernetes native objects, you can interact with them the same way you would with a Pod. For instance, running +oc get application+ retrieves a list of deployed RHACM applications just as +oc get pods+ retrieves a list of deployed Pods.
+
+This may seem like a lot of extra resources to manage besides the deployables that make up your application. However, they enable automating your applications' composition, placement, and overall control when deploying to many clusters. With a single cluster, it is easy to log in and run `oc create -f ​.` to create all of your resources. If you need to do that on a dozen clusters, however, you want to ensure you do not make a mistake or miss a cluster and need a way to schedule and orchestrate updates to your applications. Leveraging the Application Lifecycle Builder in RHACM allows you to manage multi-cluster applications easily.
 
 == Creating an Application
 
@@ -177,7 +179,8 @@ image::images/acm_labels-1.png[]
 ** *Branch*:  `main`
 ** *Path:*  `rocketchat`
 
-* Verify that *Deploy application resources only on clusters matching specified labels* is selected and enter the following information
+* Verify that *Deploy application resources on clusters with all specified labels* is selected and enter the following information
+** *Cluster sets*: `default`
 ** *Label*: `rhdp_usage`
 ** *Value*: `development`
 
@@ -187,13 +190,17 @@ It will take a few minutes to deploy the application, *Click* on the *Topology T
 
 image::images/acm-topology.png[]
 
-Under the topology view, Select the *Route* and click on the *Launch Route* *URL*, this will take you to the Book Import application with several books available.
+Under the topology view, Select the *Route* and click on the *Launch Route* *URL*, this will take you to the Rocket Chat app which is a free-to-use messaging server.
 
 image::images/acm-topology1.png[]
 
-Feel free to experiment with the application
+Feel free to experiment with the application and its cluster placement. *How would you move `rocket-chat` to the production cluster?*
 
 You successfully deployed an application to a Hosted Control Plane cluster using RHACM. This approach leveraged a Git repository which housed all of the manifests that defined your application. RHACM was able to take those manifests and use them as deployables, which were then deployed to the target cluster.
+
+=== Extra Credit
+
+If you would like to explore deploying applications via the command line and deploying ApplicationSet applications with ArgoCD, dive into this https://github.com/tosin2013/rhacm-workshop/tree/master/04.Application-Lifecycle[additional Application Lifecycle tutorial].
 
 == Governance, Risk, and Compliance (Security and compliance use case)
 
