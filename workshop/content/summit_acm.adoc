@@ -21,6 +21,8 @@ Participants will walk through these 3 major use cases:
   *** Quickly visualize detailed auditing on configuration of apps and clusters.
   *** Leverage Policy Generator to generate policies at scale.
 
+
+
 Let's get started! 
 
 == Working with Kubernetes Clusters and Cluster Lifecycle
@@ -30,9 +32,7 @@ At a high level Cluster Lifecycle management is about creating, upgrading, and d
 In the demo console where you have all the credentials, you will find the *OCP Console URL, Username and Password, AWS credentials*, *Access Key ID*, *Secret Access Key*, and the *Base DNS Domain*.
 
 ** To get started, switch over to the *OpenShift Console* 
-{{ MASTER_URL }}
-** Remember that the login is *kubeadmin* and the *password* is:
-{{ KUBEADMIN_PASSWORD }}
+** Use your login credentials (*kubeadmin* / *YOUR_PASSWORD*) from the demo console at {DEMO_URL}
 
 Once you have logged in to OpenShift Console, Navigate to the *Cluster drop down menu* and then select  *All Clusters* this will bring you to the RHACM interface.
 
@@ -70,7 +70,71 @@ The decoupling of the Control Plane and DP introduced multiple potential benefit
 
 You will also find a second cluster called *local-cluster*. This Cluster is where the Advanced Cluster Management For Kubernetes Operator resides.
 
+---
+
+=== Importing a new cluster into ACM
+
+We already have two clusters being manged in ACM, but let's add a third using the other cluster provided to you https://demo.redhat.com/workshop/es4fqq[here]. Sign in using the password provided by your instructor.
+
+Using the cluster credentials on this page, log into the *OpenShift Console*
+
+image::images/acm-images/third-cluster-access.png[]
+
+Go to the top-right corner of the page, click *opentlc-mgr* and choose *Copy login command*
+
+image::images/acm-images/copy-login-command.png[]
+
+After logging in again, click on *Display Token* to retrieve your *Server URL* and *API Token*. Copy these to a text editor.
+
+image::images/acm-images/server-url-and-token.png[]
+
+Back on your hub cluster, make sure you are still in ACM -> Clusters, and click on Import Cluster
+
+image::images/acm-images/acm-import-cluster.png[]
+
+##### Screen 1: Details
+
+* Name:  `production`
+* Cluster Set: `default`
+* Additional labels: Leave blank for now
+* Import mode: "Enter your server URL and API token for the existing cluster"
+* Server URL: Enter the *Server URL* from the previous step
+* API Token: Enter the *API Token* from the previous step
+
+Click Next
+
+image::images/acm-images/acm-import-details.png[]
+
+##### Screen 2: Automation
+
+NOTE: Ansible Automation Platform is a powerful tool with deep integrations into ACM. However, we will not cover it in this workshop.
+
+Keep all the defaults.
+
+Click Next
+
+image::images/acm-images/acm-import-rosa-automation.png[]
+
+##### Screen 3: Review
+
+You can review the cluster import settings here and even toggle the YAML view to view the CRDs that will be created for you.
+
+Click *Import*.  This will start the cluster import process
+
+image::images/acm-images/acm-import-review-yaml.png[]
+
+##### Cluster Overview
+
+After clicking *Import*, you will be brought to the Cluster Overview screen.
+
+image::images/acm-images/cluster-overview.png[]
+
+==== *Congratulations!* You have successfully imported a ROSA cluster into ACM.
+
+
 Feel free to navigate the clusters interface and explore the different day 2 actions you can perform in the cluster. 
+
+NOTE: If you see a "Cluster is pending import" message on this page, your cluster may not have imported correctly. Click on the *Copy command* button and paste this command into your cluster bastion host.
 
 == Deploying Applications to Hosted Control Plane Clusters (HCP) in AWS
 
