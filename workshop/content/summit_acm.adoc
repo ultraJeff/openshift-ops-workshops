@@ -633,14 +633,45 @@ metadata:
 
 Make sure that the alert works as expected.
 
-=== Creating a custom dashboard
+=== Creating a Custom Dashboard (Optional)
 
 In this section you will add your own dashboard to the default dashboards that come with MCO.
 
-Before you can create a custom dashboard, you need to spin up an instance of a "Development Grafana" in which you'll design your dashboard. Follow the steps described in slides 85 and 86 in the [workshop's presentation](https://docs.google.com/presentation/d/1LCPvIT_nF5hwnrfYdlD0Zie4zdDxc0kxZtW3Io5jfFk/edit?usp=sharing) to create the development instance of Grafana.
+Before you can create a custom dashboard, you need to spin up an instance of a "Development Grafana" in which you'll design your dashboard. To create the development instance of Grafana, ensure that you are on your ACM hub cluster bastion host and do the following:
 
-NOTE: Make sure to log into the Grafana Dev instance with the wanted `admin` user before you run the `./switch-to-grafana-admin.sh` script!
+```bash
+<hub> $ git clone https://github.com/open-cluster-management/multicluster-observability-operator.git
 
+<hub> $ cd multicluster-observability-operator/tools/
+
+<hub> $ ./setup-grafana-dev.sh --deploy # Creates the Grafana Development instance
+
+secret/grafana-dev-config created
+deployment.apps/grafana-dev created
+service/grafana-dev created
+serviceaccount/grafana-dev created
+clusterrolebinding.rbac.authorization.k8s.io/open-cluster-management:grafana-crb-dev created
+route.route.openshift.io/grafana-dev created
+persistentvolumeclaim/grafana-dev created
+oauthclient.oauth.openshift.io/grafana-proxy-client-dev created
+deployment.apps/grafana-dev patched
+service/grafana-dev patched
+route.route.openshift.io/grafana-dev patched
+oauthclient.oauth.openshift.io/grafana-proxy-client-dev patched
+clusterrolebinding.rbac.authorization.k8s.io/open-cluster-management:grafana-crb-dev patched
+
+Grafana dev URL: grafana-dev-open-cluster-management-observability.apps.cluster-5w8p8.5w8p8.sandbox1592.opentlc.com
+```
+
+Log in to the Grafana Dev instance using the dev URL given to you and your workshop `kubeadmin` user.
+
+Once you have logged in as `kubeadmin`, run
+
+```bash
+<hub> $ ./switch-to-grafana-admin.sh kube:admin
+```
+
+Refresh the page, you are now able create custom dashboards by clicking on the large + icon on the sidebar.
 
 ==== Panel #1 - Available memory per node
 
