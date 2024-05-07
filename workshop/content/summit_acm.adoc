@@ -541,9 +541,9 @@ This part focuses on the default Grafana dashboards that come with RHACM. Each d
 
 In this part you will configure custom alerts to monitor your environment. By configuring the alert, you will be able to receive a notification if a rule that you have configured is violated by one of managed clusters in RHACM.
 
-==== Alert #1
+==== Alert #1: High Memory Usage
 
-The first alert you will configure in the exercise will initiate a notification when a cluster's memory utilization reaches over 20%. In order to create the alert, create the next ConfigMap in the `open-cluster-management-observability` namespace (Make sure to go through the alert before applying it!).
+The first alert you will configure in this exercise will send a notification when a cluster's memory utilization reaches over 20%. In order to create the alert, apply the following ConfigMap in the `open-cluster-management-observability` namespace (Make sure to go through the alert before applying it!).
 
 ```yaml
 apiVersion: v1
@@ -568,31 +568,31 @@ metadata:
   namespace: open-cluster-management-observability
 ```
 
-Now that the alert is configured, check whether the alert is initiated or not. To check the alert, navigate to the Grafana instance you've deployed in the previous task. In the Grafana instance, go to the 'Explore' dashboard (compass icon on the left sidebar). Before checking whether the alert is initiated or not, run the alert's query to check the memory utilization in the `local-cluster` cluster. Copy the next expression to the `query` tab, and press `SHIFT + ENTER` to run the query.
+Now that the alert is configured, check whether the alert is initiated or not. To check the alert, navigate to the Grafana instance you've deployed in the previous task. In the Grafana instance, go to the *Explore* dashboard (compass icon on the left sidebar). Before checking whether the alert is ready or not, run the alert's query to check the memory utilization in the `local-cluster` cluster. Copy the next expression to the `query` tab, and press `SHIFT + ENTER` to run the query.
 
-```promql
+```c
 1 - sum(:node_memory_MemAvailable_bytes:sum) by (cluster) / sum(kube_node_status_allocatable{resource="memory"}) by (cluster)
 ```
 
 The result is a number that identifies the % of memory utilization of a cluster. For example, if the result is `0.1`, the memory utilization of a cluster is `10%`.
 
-Try running the next query -
+Try running the next query:
 
-```
+```c
 1 - sum(:node_memory_MemAvailable_bytes:sum) by (cluster) / sum(kube_node_status_allocatable{resource="memory"}) by (cluster) > 0.2
 ```
 
-The query checks whether the result of the previous query is more than `0.2` (20%). If the query checks out, it will present all clusters that utilize more than 20% of their memory - in your case, its only `local-cluster`.
+The query checks whether the result of the previous query is more than `0.2` (20%). If the query checks out, it will present all clusters that utilize more than 20% of their memory - in your case, it may be `local-cluster` and `production`.
 
 Now that you understand the mechanism behind alerting, try running a query that displays the active alerts in your environment. The query should display the alert that you've configured in the previous steps. Copy the next expression to the `query` tab, and press `SHIFT + ENTER` to run it.
 
-```
+```c
 ALERTS{alertname="ClusterMemoryHighUsage"}
 ```
 
 The initiated alert should now appear.
 
-==== Alert #2
+==== Alert #2: Database Size Warning
 
 The second alert will monitor the etcd database size. An alert will be initiated if the etcd database size in `local-cluster` reaches more than 100MiB. This time, you will create the alert expression by yourself (HINT: you can use the ACM - Clusters Overview dashboard for help).
 
