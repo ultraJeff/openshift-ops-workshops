@@ -204,9 +204,9 @@ If you would like to explore deploying applications via the command line and dep
 
 == Governance, Risk, and Compliance (Security and compliance use case)
 
-Now that you have a cluster and a deployed application, you need to make sure that they do not drift from their original configurations. This kind of drift is a serious problem, because it can happen from benign and benevolent fixes and changes, as well as malicious activities that you might not notice but can cause significant problems. The solution that RHACM provides for this is the Governance, Risk, and Compliance, or GRC, functionality.
+Now that you have a cluster and a deployed application, you must ensure they do not drift from their original configurations. This kind of drift is a serious problem because it can happen from benign and benevolent fixes and changes or malicious activities that you might not notice but can cause significant problems. RHACM's solution to this problem is the Governance, Risk, and Compliance, or GRC, functionality.
 
-==== Review GRC Functionality
+=== Review GRC Functionality
 
 Enterprises must meet internal standards for software engineering, secure engineering, resiliency, security, and regulatory compliance for workloads hosted on private, multi and hybrid clouds. Red Hat Advanced Cluster Management for Kubernetes governance provides an extensible policy framework for enterprises to introduce their own security policies.
 
@@ -216,7 +216,7 @@ image::images/acm_governance_arch2.x.png[]
 
 Use the Red Hat Advanced Cluster Management for Kubernetes security policy framework to create and manage policies. Kubernetes custom resource definition instances are used to create policies.
 
-Each Red Hat Advanced Cluster Management policy can have at least one or more templates. For more details about the policy elements, view the https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.7/html-single/governance/index#policy-yaml-table[Policy YAML] table section.
+Each Red Hat Advanced Cluster Management policy can have at least one or more templates. For more details about the policy elements, view the https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.10/html-single/governance/index#policy-yaml-table[Policy YAML] table section.
 
 
 === Creating Policies in ACM
@@ -238,12 +238,15 @@ image::images/acm_governance_yaml.png[]
 
 * Copy the following YAML and paste it on the YAML screen 
 
-[source,none,role="copypaste copypaste-warning"]
+NOTE: The following YAML creates a policy that checks whether a given cluster contains the open-cluster-management:subscription-admin ClusterRole and associated ClusterRoleBindings exist. This is an example of a Configuration Policy. Other policy types are Certificate and IAM.
+
+[source,YAML,role="copypaste copypaste-warning"]
 ----
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
   name: policy-configure-subscription-admin-hub
+  namespace: default
   annotations:
     policy.open-cluster-management.io/standards: NIST SP 800-53
     policy.open-cluster-management.io/categories: CM Configuration Management
@@ -310,6 +313,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
   name: binding-policy-configure-subscription-admin-hub
+  namespace: default
 placementRef:
   name: placement-policy-configure-subscription-admin-hub
   kind: PlacementRule
@@ -323,35 +327,37 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
   name: placement-policy-configure-subscription-admin-hub
+  namespace: default
 spec:
   clusterConditions:
   - status: "True"
     type: ManagedClusterConditionAvailable
   clusterSelector:
     matchExpressions:
-      - {key: name, operator: In, values: ["local-cluster"]} 
-----    
+      - {key: name, operator: In, values: ["local-cluster"]}
+----
 
-* Enter a namespace to place the policy, default name space is OK to use
 * Click *Next* till the end and then *Submit*
 
-Allow for the policy to propagate to the Local-cluster - RHACM Hub Cluster.
+Allow for the policy to propagate to the *local-cluster* (RHACM Hub Cluster).
 
-* Navigate back to policies and select the *policy-configure-subscription-admin-hub* policy. 
+* Navigate back to *Governance -> Policies* and check the box next to *policy-configure-subscription-admin-hub* policy. 
 
-* Under the actions dropdown, select *Enforced* This will enforce the policy, wait until green checkmark is displayed.
+* Under the *Actions* dropdown, select *Enforce* This will enforce the policy, wait until green checkmark is displayed.
 
 image::images/acm_governance_yaml2.png[]
 
+Congratulations! You just enforced your first policy.
+
 === Using Policy Generator 
 
-This Policy Generator definition will achieve 2 configuration policies:
+This Policy Generator definition will achieve two configuration policies:
 
 * *openshift-gitops-installed:* The goal of the first one is to inform if the OpenShift GitOps operator is installed on managed clusters.
 
 * *kubeadmin-removed:* The goal of this second policy is to inform if the kubeadmin user is removed from managed clusters.
 
-Both policies are informative only and will only execute them manually to showcase how to resolve issues.
+Both policies are informative only and we will only execute them manually to showcase how to resolve issues.
 
 In order to deliver these policies we will need to leverage the RHACM Application engine and the GitOps Subcription model.
 
@@ -363,7 +369,10 @@ In order to deliver these policies we will need to leverage the RHACM Applicatio
 ** Under repository types, select the *GIT* repository
 ** *URL:*  https://github.com/levenhagen/demo-policygenerator[https://github.com/levenhagen/demo-policygenerator.git]
 ** *Branch*:  `main`
-* Verify that *Deploy only to local cluster* is selected
+* Verify that *Deploy application resources on clusters with all specified labels* is selected and enter the following information
+** *Cluster sets*: `default`
+** *Label*: `local-cluster`
+** *Value*: `true`
 * Verify all the information is correct. Click *Create*
 
 It will take a few minutes to deploy the application, *Click* on the *Topology Tab* to view and verify that *all of the circles are green*.
@@ -378,13 +387,13 @@ image::images/acm-topology2.png[]
 
 image::images/acm-policy.png[]
 
-Now that the policies have been created for us leveraing the Policy Generator Engine let's go ahead and enforce them.
+Now that the policies have been created for us leveraing the Policy Generator Engine let's go ahead and enforce the GitOps policy.
 
-* On the *openshift-gitops-installed* policy, click on the elipses and set policy to *Enfornce*
+WARNING: *Do not enforce the kubeadmin-removed policy*. You won't be able to access that cluster through the console as the only account created on these clusters is kubeadmin.
+
+* On the *openshift-gitops-installed* policy, click on the elipses and set policy to *Enforce*
 
 image::images/acm-policy2.png[]
-
-* Click the *Enforce* button to verify 
 
 * Wait a few minutes and you will see that the *Cluster Violations* will go from *red* to *green*
 
@@ -392,9 +401,14 @@ image::images/acm-policy3.png[]
 
 * Click on the Policy and select *Results* verify that the gitops operator has been installed.
 
-Feel free to repeat the steps with the *kubeadmin-removed* Policy, however if you enforce this you won't be able to access that cluster through the console as the only account created on these clusters is Kubadmin.
-
 Now you have succesfully created a Policy leveraing the Policy Generator to scan your clusters, if you would like to play with other policies please visit the https://github.com/stolostron/policy-collection[Policy Repo] for more Policies you can test out.
+
+---
+
+==== *Extra Credit*
+If you would like to run through more policies, including ones in the official https://github.com/stolostron/policy-collection[Policy Repo] and check out templating policies, please continue the tutorial https://github.com/tosin2013/rhacm-workshop/blob/master/05.Governance-Risk-Compliance/README.md[here].
+
+---
 
 In Summary, we worked with a OpenShift Hosted Control Plane cluster, deploy applications and manage policies all with Red Hat Advanced Cluster Management for Kubernetes, making it much easier to build, manage and secure your Kubernetes Clusters.
 
