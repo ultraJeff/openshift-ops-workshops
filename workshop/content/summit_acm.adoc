@@ -83,11 +83,11 @@ The decoupling of the Control Plane and DP introduced multiple potential benefit
 
 === Importing a new cluster into ACM
 
-We already have two clusters being manged in ACM, but let's add a third using the other cluster provided to you https://demo.redhat.com/workshop/es4fqq[here]. Sign in using the password provided by your instructor and 
-
-Using the cluster credentials on this page, log into the *OpenShift Console*
+We already have two clusters being manged in ACM, but let's add a third using the other cluster provided to you https://demo.redhat.com/workshop/es4fqq[here]. Sign in using the password provided by your instructor and find your cluster credentials on this page.
 
 image::images/acm-images/third-cluster-access.png[]
+
+Using the cluster credentials, log into the *OpenShift Console*.
 
 Go to the top-right corner of the page, click *opentlc-mgr* and choose *Copy login command*
 
@@ -97,11 +97,11 @@ After logging in again, click on *Display Token* to retrieve your *Server URL* a
 
 image::images/acm-images/server-url-and-token.png[]
 
-Back on your hub cluster, make sure you are still in ACM -> Clusters, and click on Import Cluster
+Back on your hub cluster, make sure you are still in *ACM -> Clusters*, and click on *Import Cluster*
 
 image::images/acm-images/acm-import-cluster.png[]
 
-##### Screen 1: Details
+==== Screen 1: Details
 
 * Name:  `production`
 * Cluster Set: `default`
@@ -114,7 +114,7 @@ Click Next
 
 image::images/acm-images/acm-import-details.png[]
 
-##### Screen 2: Automation
+==== Screen 2: Automation
 
 NOTE: Ansible Automation Platform is a powerful tool with deep integrations into ACM. However, we will not cover it in this workshop.
 
@@ -124,28 +124,27 @@ Click Next
 
 image::images/acm-images/acm-import-rosa-automation.png[]
 
-##### Screen 3: Review
+==== Screen 3: Review
 
 You can review the cluster import settings here and even toggle the YAML view to view the CRDs that will be created for you.
 
-Click *Import*.  This will start the cluster import process
+Click *Import*. This will start the cluster import process.
 
 image::images/acm-images/acm-import-review-yaml.png[]
 
-##### Cluster Overview
+==== Cluster Overview
 
 After clicking *Import*, you will be brought to the Cluster Overview screen.
 
-image::images/acm-images/cluster-overview.png[]
-
-==== *Congratulations!* You have successfully imported a ROSA cluster into ACM.
-
-
 Feel free to navigate the clusters interface and explore the different day 2 actions you can perform in the cluster. 
 
-NOTE: If you see a "Cluster is pending import" message on this page, your cluster may not have imported correctly. Click on the *Copy command* button and paste this command into your cluster bastion host.
+image::images/acm-images/cluster-overview.png[]
 
-== Deploying Applications to Hosted Control Plane Clusters (HCP) in AWS
+===== *Congratulations!* You have successfully imported a new OpenShift cluster into ACM. Easy, right?
+
+NOTE: If you see a "Cluster is pending import" message on this page, your cluster may not have imported correctly. Click on the *Copy command* button and paste the command into your cluster bastion host.
+
+== Deploying Applications to Clusters
 
 Your environment came pre-loaded with an existing Hosted Control Plane Cluster hosted in AWS called *development*, we will be deploying an application to this cluster.
 
@@ -155,7 +154,7 @@ This table describes the different components that the Application Lifecycle mod
 
 
 |===
-|*Resource*|*Purpose *
+|*Resource*|*Purpose*
 
 |Channel|Defines a place where deployable resources are stored, such as an object store, Kubernetes namespace, Helm repository, or GitHub repository.
 |Subscription|Definitions that identify deployable resources available in a Channel resource to be deployed to a target cluster.
@@ -164,11 +163,11 @@ This table describes the different components that the Application Lifecycle mod
 |===
 
 
-These are all Kubernetes custom resources, defined by a Custom Resource Definition (CRD), created for you when RHACM is installed. By creating these as Kubernetes native objects, you can interact with them the same way you would with a Pod. For instance, running +oc get application+ retrieves a list of deployed RHACM applications just as +oc get pods+ retrieves a list of deployed Pods.
+These are all Kubernetes custom resources, defined by a Custom Resource Definition (CRD), created for you when RHACM is installed. By creating these as Kubernetes native objects, you can interact with them the same way you would with a Pod. For instance, running `oc get application` retrieves a list of deployed RHACM applications just as `oc get pods` retrieves a list of deployed Pods.
 
-This may seem like a lot of extra resources to manage besides the deployables that make up your application. However, they enable automating your applications' composition, placement, and overall control when deploying to many clusters. With a single cluster, it is easy to log in and run `oc create -f ​.` to create all of your resources. If you need to do that on a dozen clusters, however, you want to ensure you do not make a mistake or miss a cluster and need a way to schedule and orchestrate updates to your applications. Leveraging the Application Lifecycle Builder in RHACM allows you to manage multi-cluster applications easily.
+This may seem like a lot of extra resources to manage besides the deployables that make up your application; however, they enable automating your application's composition, placement, and overall control when deploying to many clusters. With a single cluster, it is easy to log in and run `oc create -f ​.` to create all of your resources. If you need to do that on a dozen clusters, however, you want to ensure you do not make a mistake or miss a cluster and need a way to schedule and orchestrate updates to your applications. Leveraging the Application Lifecycle management tools in RHACM allows you to manage multi-cluster applications easily.
 
-== Creating an Application
+=== Creating an Application
 
 *Prerequisites:*
 
@@ -203,13 +202,13 @@ Under the topology view, Select the *Route* and click on the *Launch Route* *URL
 
 image::images/acm-topology1.png[]
 
-Feel free to experiment with the application and its cluster placement. *How would you move `rocket-chat` to the production cluster?*
+*Congratulations!* You successfully deployed an application to your *development* cluster using RHACM. This approach leveraged a Git repository which housed all of the Kubernetes manifests (YAML) that defined your application. RHACM was able to take those manifests and use them as deployables, which were then deployed to the target cluster based on a label match.
 
-You successfully deployed an application to a Hosted Control Plane cluster using RHACM. This approach leveraged a Git repository which housed all of the manifests that defined your application. RHACM was able to take those manifests and use them as deployables, which were then deployed to the target cluster.
+Feel free to experiment with the application and its cluster placement.  How would you move `rocket-chat` to the *production* cluster?
 
 ---
 
-=== Extra Credit
+==== Extra Credit
 
 If you would like to explore deploying applications via the command line dive into this https://github.com/tosin2013/rhacm-workshop/tree/master/04.Application-Lifecycle[additional Application Lifecycle tutorial]. *Stop at ArgoCD Integration.* We will be doing this later in the tutorial!
 
