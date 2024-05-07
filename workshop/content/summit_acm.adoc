@@ -710,19 +710,37 @@ image::images/acm-images/panel-1.png[]
 
 ==== Export the dashboard to the main Grafana instance
 
-Until now, you have worked on the "Development" Grafana instance. It's time to export the dashboard you've created to the main "Production" Grafana instance. Before you begin the export process, make sure to save your dashboard by pressing `CTRL + S`. Provide the dashboard with a simple, declarative name.
+Until now, you have worked on the "Development" Grafana instance. It's time to export the dashboard you've created to the main "Production" Grafana instance. Before you begin the export process, make sure to save your dashboard by pressing `CTRL/CMD + S`.
 
-To export the dashboard to the "Production" instance, follow the steps described in slides 87,88 in the [workshop's presentation](https://docs.google.com/presentation/d/1LCPvIT_nF5hwnrfYdlD0Zie4zdDxc0kxZtW3Io5jfFk/edit?usp=sharing).
+Name your dashboard "Available Memory Per Node" and take the remaining defaults.
 
-Make sure that the dashboard is available in the Production Grafana instance in the 'Custom' directory.
+To export the dashboard to the "Production" instance, follow these steps
+
+```bash
+<hub> $ ./generate-dashboard-configmap-yaml.sh "Available Memory Per Node"
+
+Save dashboard <available-memory-per-node> to ./available-memory-per-node.yaml
+```
+
+The script generates a ConfigMap which contains the custom dashboard. Apply the ConfigMap to the Hub in order to deploy the custom dashboard on the “Production” Grafana instance.
+
+```bash
+<hub> $ oc apply -f ./available-memory-per-node.yaml
+
+configmap/available-memory-per-node created
+```
+
+Now return to your production instance of Grafana and go to *Dashboards -> Browse* and locate the *Custom* folder. You will find your new custom dashboard here!
+
+image::images/acm-images/grafana-custom-dashboard.png[]
+
+*Congratulations!* You just installed Multi-cluster Observability, explored its interface, created custom alerts, and created a custom dashboard.
 
 Would you like to do more with Grafana in ACM? Please check out the https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.10/html/observability/index[Observability] docs to learn more.
 
 ---
 
-In summary, we worked with a OpenShift Hosted Control Plane cluster, deploy applications and manage policies all with Red Hat Advanced Cluster Management for Kubernetes, making it much easier to build, manage and secure your Kubernetes Clusters.
+Thank you all for your time today! In summary, we worked with a variety of OpenShift clusters, deployed applications, managed policies multiple ways, and discovered insights through observability, all with Red Hat Advanced Cluster Management for Kubernetes, making it much easier to build, manage and secure your Kubernetes Clusters.
 
-*This concludes the Red Hat Advanced Cluster Management lab. Thank you for your time!*
-
-Find out more about https://www.redhat.com/en/technologies/management/advanced-cluster-management[Red Hat Advanced Cluster Management]
+*This concludes the Red Hat Advanced Cluster Management lab. Find out more about https://www.redhat.com/en/technologies/management/advanced-cluster-management[Red Hat Advanced Cluster Management]*
 
