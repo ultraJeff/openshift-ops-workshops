@@ -635,7 +635,7 @@ Make sure that the alert works as expected.
 
 === Creating a Custom Dashboard (Optional)
 
-In this section you will add your own dashboard to the default dashboards that come with MCO.
+In this section you will add your own dashboard to the default dashboards that come with ACM Multi-Cluster Observability.
 
 Before you can create a custom dashboard, you need to spin up an instance of a "Development Grafana" in which you'll design your dashboard. To create the development instance of Grafana, ensure that you are on your ACM hub cluster bastion host and do the following:
 
@@ -673,7 +673,7 @@ Once you have logged in as `kubeadmin`, run
 
 Refresh the page, you are now able create custom dashboards by clicking on the large + icon on the sidebar.
 
-==== Panel #1 - Available memory per node
+==== Custom Panel - Available memory per node
 
 The dashboard you design in this part will present a graph that aggregates all available nodes in all clusters and show their available memory over a defined time period. In order to configure that dashboard, follow the next steps -
 
@@ -690,23 +690,23 @@ The dashboard you design in this part will present a graph that aggregates all a
 
 image::images/acm-images/panel-1.png[]
 
-==== Panel #2 - Available CPU per node
+// ==== Panel #2 - Available CPU per node
 
-For this panel, you will create a same graph like in the previous section, but this time, you will monitor the node's available CPU. While creating the panel, make sure that you use the correct `Units`.
+// For this panel, you will create a same graph like in the previous section, but this time, you will monitor the node's available CPU. While creating the panel, make sure that you use the correct `Units`.
 
-image::images/acm-images/panel-2.png[]
+// image::images/acm-images/panel-2.png[]
 
-Make sure that you get the correct values by running the next command on the hub cluster -
+// Make sure that you get the correct values by running the next command on the hub cluster
 
-```bash
-<hub> $ oc adm top node
-NAME                                         CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%   
-ip-10-0-138-131.us-east-2.compute.internal   2064m        27%    10496Mi         34%       
-ip-10-0-148-108.us-east-2.compute.internal   3259m        21%    11826Mi         19%       
-ip-10-0-166-190.us-east-2.compute.internal   7359m        47%    16188Mi         26%       
-ip-10-0-186-66.us-east-2.compute.internal    1786m        23%    8773Mi          28%       
-ip-10-0-202-11.us-east-2.compute.internal    1754m        23%    8781Mi          28%  
-```
+// ```bash
+// <hub> $ oc adm top node
+// NAME                                         CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%   
+// ip-10-0-138-131.us-east-2.compute.internal   2064m        27%    10496Mi         34%       
+// ip-10-0-148-108.us-east-2.compute.internal   3259m        21%    11826Mi         19%       
+// ip-10-0-166-190.us-east-2.compute.internal   7359m        47%    16188Mi         26%       
+// ip-10-0-186-66.us-east-2.compute.internal    1786m        23%    8773Mi          28%       
+// ip-10-0-202-11.us-east-2.compute.internal    1754m        23%    8781Mi          28%  
+// ```
 
 ==== Export the dashboard to the main Grafana instance
 
