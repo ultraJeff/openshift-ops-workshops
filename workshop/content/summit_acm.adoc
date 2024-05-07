@@ -198,9 +198,13 @@ Feel free to experiment with the application and its cluster placement. *How wou
 
 You successfully deployed an application to a Hosted Control Plane cluster using RHACM. This approach leveraged a Git repository which housed all of the manifests that defined your application. RHACM was able to take those manifests and use them as deployables, which were then deployed to the target cluster.
 
+---
+
 === Extra Credit
 
-If you would like to explore deploying applications via the command line and deploying ApplicationSet applications with ArgoCD, dive into this https://github.com/tosin2013/rhacm-workshop/tree/master/04.Application-Lifecycle[additional Application Lifecycle tutorial].
+If you would like to explore deploying applications via the command line dive into this https://github.com/tosin2013/rhacm-workshop/tree/master/04.Application-Lifecycle[additional Application Lifecycle tutorial]. *Stop at ArgoCD Integration.* We will be doing this later in the tutorial!
+
+---
 
 == Governance, Risk, and Compliance (Security and compliance use case)
 
@@ -406,9 +410,281 @@ Now you have succesfully created a Policy leveraing the Policy Generator to scan
 ---
 
 ==== *Extra Credit*
-If you would like to run through more policies, including ones in the official https://github.com/stolostron/policy-collection[Policy Repo] and check out templating policies, please continue the tutorial https://github.com/tosin2013/rhacm-workshop/blob/master/05.Governance-Risk-Compliance/README.md[here].
+If you would like to run through more policies, including ones in the official https://github.com/stolostron/policy-collection[Policy Repo] and check out templating policies, please continue the tutorial https://github.com/tosin2013/rhacm-workshop/blob/master/05.Governance-Risk-Compliance/README.md[here]. For even more advanced policies, continue with https://github.com/tosin2013/rhacm-workshop/tree/master/06.Advanced-Policy-Management#exercise-6---open-policy-agent-gatekeeper[advanced policy management].
+
+Additionally, now that we have OpenShift GitOps installed, if you dove into the additional Application Lifecycle tutorial earlier, you can continue with it from https://github.com/tosin2013/rhacm-workshop/blob/master/04.Application-Lifecycle/README.md#preparing-rhacm-for-argocd-integration[this point].
 
 ---
 
-In Summary, we worked with a OpenShift Hosted Control Plane cluster, deploy applications and manage policies all with Red Hat Advanced Cluster Management for Kubernetes, making it much easier to build, manage and secure your Kubernetes Clusters.
+== End-to-End Visibility (Observability)
+
+In this section, we will put on our Site Reliability Engineer (SRE) hats and set up a dashboard to view multi-cluster system alerts, critical application metrics, and overall system health using ACM's integration with Grafana. Let's walk through the steps now.
+
+You will need:
+
+* Your AWS Keys (from your https://demo.redhat.com/workshop/qmukdd[environment homepage])
+* An AWS S3 bucket
+* Your workshop bastion host (also from your environment homepage)
+
+=== Create the S3 Bucket
+
+* Log into your bastion host
+* Run the following command to log in to AWS:  `aws configure`  and enter your AWS keys when prompted.  Default region: *us-east-2*
+* Then, run the following command to create the S3 bucket. (_**Please take note of the bucket name**_)
+
+```bash
+aws s3 mb s3://grafana-$GUID
+```
+
+=== Integrate Grafana into ACM
+* Login to your OpenShift cluster from your bastion host
+* Create a namespace for observability by running
+
+```bash
+oc create namespace open-cluster-management-observability
+```
+
+pmERD-DBbZH-mQdfC-L8Cmb
+
+* Copy the pull secret into this new namespace by running the following two commands
+
+```bash
+DOCKER_CONFIG_JSON=`oc extract secret/pull-secret -n openshift-config --to=-`
+```
+
+```bash
+oc create secret generic multiclusterhub-operator-pull-secret -n open-cluster-management-observability --from-literal=.dockerconfigjson="$DOCKER_CONFIG_JSON" --type=kubernetes.io/dockerconfigjson
+```
+
+* In your current folder, create a file called *thanos-object-storage.yaml* and add the following. Please be sure to *update your S3 bucket name and AWS keys*
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: thanos-object-storage
+type: Opaque
+stringData:
+  thanos.yaml: |
+    type: s3
+    config:
+      bucket: YOUR_S3_BUCKET
+      endpoint: s3.amazonaws.com
+      insecure: false
+      access_key: YOUR_ACCESS_KEY
+      secret_key: YOUR_SECRET_KEY
+```
+
+* Create a secret for your object storage by running the following command
+
+```bash
+oc create -f thanos-object-storage.yaml -n open-cluster-management-observability
+```
+
+* Create the *MultiClusterObservability* custom resource for your managed clusters. To do this, create a YAML file named *mco_cr.yaml*
+
+```yaml
+apiVersion: observability.open-cluster-management.io/v1beta2
+kind: MultiClusterObservability
+metadata:
+  name: observability #Your customized name of MulticlusterObservability CR
+spec:
+  availabilityConfig: High # Available values are High or Basic
+  enableDownSampling: false # The default value is false. This is not recommended as querying long-time ranges without non-downsampled data is not efficient and useful.
+  imagePullPolicy: Always
+  observabilityAddonSpec: # The ObservabilityAddonSpec defines the global settings for all managed clusters which have observability add-on enabled
+    enableMetrics: true # EnableMetrics indicates the observability addon push metrics to hub server
+    interval: 30 # Interval for the observability addon push metrics to hub server
+  retentionResolution1h: 30d # How long to retain samples of 1 hour in bucket
+  retentionResolution5m: 14d
+  retentionResolutionRaw: 5d
+  storageConfig: # Specifies the storage to be used by Observability
+    metricObjectStorage:
+      name: thanos-object-storage
+      key: thanos.yaml
+    statefulSetSize: 10Gi # The amount of storage applied to the Observability StatefulSets, i.e. Amazon S3 store, Rule, compact and receiver.
+    statefulSetStorageClass: gp2
+```
+NOTE: There are multiple other optional fields to customize this resource. Please check the https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.7/html/apis/apis#rhacm-docs_apis_multiclusterobservability_jsonmulticlusterobservability[API reference] if you want to change other optional parameters not shown in the YAML above.
+
+* Apply the observability YAML to your cluster by running the following command
+
+```bash
+oc apply -f mco_cr.yaml
+```
+
+* Now navigate to Infrastructure -> Clusters and note the Grafana link in the top right corner of the page.
+
+image::images/acm-images/acm-grafana-link.png[]
+
+* Click the link and log in using your OpenShift credentials. You will shortly see something like the below
+
+image::images/acm-images/acm-grafana-dashboard.png[]
+
+NOTE: It will take a few minutes for the metrics to become visible on the dashboard
+
+=== Explore the default Grafana dashboards
+
+This part focuses on the default Grafana dashboards that come with RHACM. Each dashboard has its own characteristics and provides valuable information to a system administrator in the organization. This section contains multiple tasks that require you to look for certain values in the default dashboards that come with `MCO`.
+
+- Find the maximum latency value for the `local-cluster` API server.
+- Find out how much % of `local-cluster`'s memory is utilized.
+- Find what is the size of the etcd database in `local-cluster`.
+- Find the namespace that consumes the most CPU in `local-cluster`.
+- Find what's the node in `local-cluster` that consumes the most % memory.
+- Find what's the `apiserver` (openshift-apiserver namespace) pod CPU utilization and quota.
+
+=== Creating a custom alert
+
+In this part you will configure custom alerts to monitor your environment. By configuring the alert, you will be able to receive a notification if a rule that you have configured is violated by one of managed clusters in RHACM.
+
+==== Alert #1
+
+The first alert you will configure in the exercise will initiate a notification when a cluster's memory utilization reaches over 20%. In order to create the alert, create the next ConfigMap in the `open-cluster-management-observability` namespace (Make sure to go through the alert before applying it!).
+
+```yaml
+apiVersion: v1
+data:
+  custom_rules.yaml: |
+    groups:
+      - name: cluster-health
+        rules:
+        - alert: ClusterMemoryHighUsage
+          annotations:
+            summary: Notify when memory utilization on a cluster is greater than the defined utilization limit - 20%
+            description: "The cluster has a high memory usage: {{ $value }} for {{ $labels.cluster }}."
+          expr: |
+            1 - sum(:node_memory_MemAvailable_bytes:sum) by (cluster) / sum(kube_node_status_allocatable{resource="memory"}) by (cluster) > 0.2
+          for: 5s
+          labels:
+            cluster: "{{ $labels.cluster }}"
+            severity: critical
+kind: ConfigMap
+metadata:
+  name: thanos-ruler-custom-rules
+  namespace: open-cluster-management-observability
+```
+
+Now that the alert is configured, check whether the alert is initiated or not. To check the alert, navigate to the Grafana instance you've deployed in the previous task. In the Grafana instance, go to the 'Explore' dashboard (compass icon on the left sidebar). Before checking whether the alert is initiated or not, run the alert's query to check the memory utilization in the `local-cluster` cluster. Copy the next expression to the `query` tab, and press `SHIFT + ENTER` to run the query.
+
+```promql
+1 - sum(:node_memory_MemAvailable_bytes:sum) by (cluster) / sum(kube_node_status_allocatable{resource="memory"}) by (cluster)
+```
+
+The result is a number that identifies the % of memory utilization of a cluster. For example, if the result is `0.1`, the memory utilization of a cluster is `10%`.
+
+Try running the next query -
+
+```
+1 - sum(:node_memory_MemAvailable_bytes:sum) by (cluster) / sum(kube_node_status_allocatable{resource="memory"}) by (cluster) > 0.2
+```
+
+The query checks whether the result of the previous query is more than `0.2` (20%). If the query checks out, it will present all clusters that utilize more than 20% of their memory - in your case, its only `local-cluster`.
+
+Now that you understand the mechanism behind alerting, try running a query that displays the active alerts in your environment. The query should display the alert that you've configured in the previous steps. Copy the next expression to the `query` tab, and press `SHIFT + ENTER` to run it.
+
+```
+ALERTS{alertname="ClusterMemoryHighUsage"}
+```
+
+The initiated alert should now appear.
+
+==== Alert #2
+
+The second alert will monitor the etcd database size. An alert will be initiated if the etcd database size in `local-cluster` reaches more than 100MiB. This time, you will create the alert expression by yourself (HINT: you can use the ACM - Clusters Overview dashboard for help).
+
+In order to deploy the second alert to `MCO` add the new alert definition to the `ConfigMap` you have created for the previous alert. The ConfigMap should look like -
+
+```yaml
+apiVersion: v1
+data:
+  custom_rules.yaml: |
+    groups:
+      - name: cluster-health
+        rules:
+        - alert: ClusterMemoryHighUsage
+          annotations:
+            summary: Notify when memory utilization on a cluster is greater than the defined utilization limit - 20%
+            description: "The cluster has a high memory usage: {{ $value }} for {{ $labels.cluster }}."
+          expr: |
+            1 - sum(:node_memory_MemAvailable_bytes:sum) by (cluster) / sum(kube_node_status_allocatable{resource="memory"}) by (cluster) > 0.2
+          for: 5s
+          labels:
+            cluster: "{{ $labels.cluster }}"
+            severity: critical
+        - alert: ExampleSecondAlert
+          annotations:
+            summary: Example Summary
+            description: "Example description"
+          expr: |
+            ...
+kind: ConfigMap
+metadata:
+  name: thanos-ruler-custom-rules
+  namespace: open-cluster-management-observability
+```
+
+Make sure that the alert works as expected.
+
+=== Creating a custom dashboard
+
+In this section you will add your own dashboard to the default dashboards that come with MCO.
+
+Before you can create a custom dashboard, you need to spin up an instance of a "Development Grafana" in which you'll design your dashboard. Follow the steps described in slides 85 and 86 in the [workshop's presentation](https://docs.google.com/presentation/d/1LCPvIT_nF5hwnrfYdlD0Zie4zdDxc0kxZtW3Io5jfFk/edit?usp=sharing) to create the development instance of Grafana.
+
+NOTE: Make sure to log into the Grafana Dev instance with the wanted `admin` user before you run the `./switch-to-grafana-admin.sh` script!
+
+
+==== Panel #1 - Available memory per node
+
+The dashboard you design in this part will present a graph that aggregates all available nodes in all clusters and show their available memory over a defined time period. In order to configure that dashboard, follow the next steps -
+
+- Log into the development instance.
+- Press on the large `+` on the left sidebar, select `Dashboard`.
+- A panel will appear in the new dashboard. Press on `Add an empty panel` in order to create a custom graph.
+- Enter the next query in the `Metrics browser` tab - `node_memory_MemAvailable_bytes{cluster="local-cluster"}`.
+- Enter the next label into the `Legend` field - `{{ instance }}`.
+- In the right menu, scroll down to the `Standard options` section. In the `Unit` section, select `Data` -> `bytes (IEC)`.
+- In the same menu, add `0` to the `Min` key.
+- In the top of the right menu, provide your panel with a name at - `Panel title`.
+- Press on `Apply` at the top right end of the screen.
+- You have created your first panel!
+
+image::images/acm-images/panel-1.png[]
+
+==== Panel #2 - Available CPU per node
+
+For this panel, you will create a same graph like in the previous section, but this time, you will monitor the node's available CPU. While creating the panel, make sure that you use the correct `Units`.
+
+image::images/acm-images/panel-2.png[]
+
+Make sure that you get the correct values by running the next command on the hub cluster -
+
+```bash
+<hub> $ oc adm top node
+NAME                                         CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%   
+ip-10-0-138-131.us-east-2.compute.internal   2064m        27%    10496Mi         34%       
+ip-10-0-148-108.us-east-2.compute.internal   3259m        21%    11826Mi         19%       
+ip-10-0-166-190.us-east-2.compute.internal   7359m        47%    16188Mi         26%       
+ip-10-0-186-66.us-east-2.compute.internal    1786m        23%    8773Mi          28%       
+ip-10-0-202-11.us-east-2.compute.internal    1754m        23%    8781Mi          28%  
+```
+
+==== Export the dashboard to the main Grafana instance
+
+Until now, you have worked on the "Development" Grafana instance. It's time to export the dashboard you've created to the main "Production" Grafana instance. Before you begin the export process, make sure to save your dashboard by pressing `CTRL + S`. Provide the dashboard with a simple, declarative name.
+
+To export the dashboard to the "Production" instance, follow the steps described in slides 87,88 in the [workshop's presentation](https://docs.google.com/presentation/d/1LCPvIT_nF5hwnrfYdlD0Zie4zdDxc0kxZtW3Io5jfFk/edit?usp=sharing).
+
+Make sure that the dashboard is available in the Production Grafana instance in the 'Custom' directory.
+
+Would you like to do more with Grafana in ACM? Please check out the https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.10/html/observability/index[Observability] docs to learn more.
+
+---
+
+In summary, we worked with a OpenShift Hosted Control Plane cluster, deploy applications and manage policies all with Red Hat Advanced Cluster Management for Kubernetes, making it much easier to build, manage and secure your Kubernetes Clusters.
+
+*This concludes the Red Hat Advanced Cluster Management lab. Thank you for your time!*
+
+Find out more about https://www.redhat.com/en/technologies/management/advanced-cluster-management[Red Hat Advanced Cluster Management]
 
