@@ -594,9 +594,13 @@ The initiated alert should now appear.
 
 ==== Alert #2: Database Size Warning
 
-The second alert will monitor the etcd database size. An alert will be initiated if the etcd database size in `local-cluster` reaches more than 100MiB. This time, you will create the alert expression by yourself (HINT: you can use the ACM - Clusters Overview dashboard for help).
+The second alert will monitor the etcd database size. An alert will be initiated if the etcd database size in `local-cluster` reaches more than 200MiB. This time, you will create the alert expression by yourself (HINT: you can use the *Grafana -> Explore* Metrics browser for help).
 
-In order to deploy the second alert to `MCO` add the new alert definition to the `ConfigMap` you have created for the previous alert. The ConfigMap should look like -
+```c
+ALERTS{alertname="EtcdHighStorage"}
+```
+
+In order to deploy the second alert to `MCO` add the new alert definition to the `ConfigMap` you have created for the previous alert. The ConfigMap should look like
 
 ```yaml
 apiVersion: v1
@@ -615,12 +619,12 @@ data:
           labels:
             cluster: "{{ $labels.cluster }}"
             severity: critical
-        - alert: ExampleSecondAlert
+        - alert: EtcdHighStorage
           annotations:
-            summary: Example Summary
-            description: "Example description"
+            summary: Notify when etcd storage is above 200MiB
+            description: "etcd has high storage usage: {{ $value }}"
           expr: |
-            ...
+            <YOUR_EXPRESSION>
 kind: ConfigMap
 metadata:
   name: thanos-ruler-custom-rules
