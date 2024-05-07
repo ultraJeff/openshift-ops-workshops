@@ -1,4 +1,5 @@
 = Red Hat Advanced Cluster Management for Kubernetes - RHACM
+:toc:
 
 == Goal of the Workshop
 
@@ -21,6 +22,10 @@ Participants will walk through these 3 major use cases:
   *** Quickly visualize detailed auditing on configuration of apps and clusters.
   *** Leverage Policy Generator to generate policies at scale.
 
+** Observability
+ *** View metrics on your manged clusters
+ *** Create alerts for your metrics
+ *** Create custom Grafana dashboards
 
 
 Let's get started! 
