@@ -210,7 +210,9 @@ Feel free to experiment with the application and its cluster placement.  How wou
 
 ==== Extra Credit
 
-If you would like to explore deploying applications via the command line dive into this https://github.com/tosin2013/rhacm-workshop/tree/master/04.Application-Lifecycle[additional Application Lifecycle tutorial]. *Stop at ArgoCD Integration.* We will be doing this later in the tutorial!
+If you would like to explore deploying applications via the command line dive into this https://github.com/ultraJeff/rhacm-workshop/tree/master/04.Application-Lifecycle[additional Application Lifecycle tutorial]. *Stop at ArgoCD Integration.* We will be doing this later in the tutorial!
+
+NOTE: You will need to add a new `environment=dev` label to your *development* cluster to deploy the application according to the instructions.
 
 ---
 
@@ -418,9 +420,9 @@ Now you have succesfully created a Policy leveraing the Policy Generator to scan
 ---
 
 ==== *Extra Credit*
-If you would like to run through more policies, including ones in the official https://github.com/stolostron/policy-collection[Policy Repo] and check out templating policies, please continue the tutorial https://github.com/tosin2013/rhacm-workshop/blob/master/05.Governance-Risk-Compliance/README.md[here]. For even more advanced policies, continue with https://github.com/tosin2013/rhacm-workshop/tree/master/06.Advanced-Policy-Management#exercise-6---open-policy-agent-gatekeeper[advanced policy management].
+If you would like to run through more policies, including ones in the official https://github.com/stolostron/policy-collection[Policy Repo] and check out templating policies, please continue the tutorial https://github.com/ultraJeff/rhacm-workshop/blob/master/05.Governance-Risk-Compliance/README.md[here]. For even more advanced policies, continue with https://github.com/ultraJeff/rhacm-workshop/tree/master/06.Advanced-Policy-Management#exercise-6---open-policy-agent-gatekeeper[advanced policy management].
 
-Additionally, now that we have OpenShift GitOps installed, if you dove into the additional Application Lifecycle tutorial earlier, you can continue with it from https://github.com/tosin2013/rhacm-workshop/blob/master/04.Application-Lifecycle/README.md#preparing-rhacm-for-argocd-integration[this point].
+Additionally, now that we have OpenShift GitOps installed, if you dove into the additional Application Lifecycle tutorial earlier, you can continue with it from https://github.com/ultraJeff/rhacm-workshop/blob/master/04.Application-Lifecycle/README.md#preparing-rhacm-for-argocd-integration[this point].
 
 ---
 
