@@ -361,9 +361,9 @@ Allow for the policy to propagate to the *local-cluster* (RHACM Hub Cluster).
 
 image::images/acm_governance_yaml2.png[]
 
-Congratulations! You just enforced your first policy.
+*Congratulations!* You just enforced your first policy.
 
-=== Using Policy Generator 
+=== Using the Policy Generator 
 
 This Policy Generator definition will achieve two configuration policies:
 
@@ -371,7 +371,7 @@ This Policy Generator definition will achieve two configuration policies:
 
 * *kubeadmin-removed:* The goal of this second policy is to inform if the kubeadmin user is removed from managed clusters.
 
-Both policies are informative only and we will only execute them manually to showcase how to resolve issues.
+Both policies are informative only and we will only execute the GitOps Policy manually to showcase how to resolve issues.
 
 In order to deliver these policies we will need to leverage the RHACM Application engine and the GitOps Subcription model.
 
@@ -395,13 +395,13 @@ image::images/acm-topology2.png[]
 
 * Navigate to the *Governance* tab 
 * Click on the *Policies* tab
-* Verify that you see 2 policies and that there *Cluster Violations* count is 1
+* Verify that you see the two new policies and that there are *Cluster Violations*
 ** *kubeadmin-removed*
 ** *openshift-gitops-installed*
 
 image::images/acm-policy.png[]
 
-Now that the policies have been created for us leveraing the Policy Generator Engine let's go ahead and enforce the GitOps policy.
+Now that the policies have been created for us leveraing the Policy Generator Engine let's go ahead and *enforce the GitOps Policy*.
 
 WARNING: *Do not enforce the kubeadmin-removed policy*. You won't be able to access that cluster through the console as the only account created on these clusters is kubeadmin.
 
@@ -409,13 +409,13 @@ WARNING: *Do not enforce the kubeadmin-removed policy*. You won't be able to acc
 
 image::images/acm-policy2.png[]
 
-* Wait a few minutes and you will see that the *Cluster Violations* will go from *red* to *green*
+* Wait a few minutes and you will see that the *openshift-gitops-installed* cluster violation will go from *red* to *green*
 
 image::images/acm-policy3.png[]
 
-* Click on the Policy and select *Results* verify that the gitops operator has been installed.
+* Click on the Policy and select *Results* to verify that the GitOps operator has been installed.
 
-Now you have succesfully created a Policy leveraing the Policy Generator to scan your clusters, if you would like to play with other policies please visit the https://github.com/stolostron/policy-collection[Policy Repo] for more Policies you can test out.
+Now you have succesfully created a Policy leveraging the Policy Generator to scan your clusters. If you would like to play with other policies please visit the https://github.com/stolostron/policy-collection[Policy Repo] for more Policies you can test out.
 
 ---
 
