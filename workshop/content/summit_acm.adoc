@@ -5,7 +5,7 @@
 
 In this session, participants will learn how to work with Red Hat Advanced Cluster Management for Kubernetes (RHACM) 
 
-Participants will walk through these 3 major use cases:
+Participants will walk through these four major use cases:
 
 ** Multi-Cluster Lifecycle
   *** Centrally manage, create update and delete Kubernetes clusters.
