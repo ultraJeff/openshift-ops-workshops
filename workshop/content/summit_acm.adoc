@@ -454,8 +454,6 @@ aws s3 mb s3://grafana-$GUID
 oc create namespace open-cluster-management-observability
 ```
 
-pmERD-DBbZH-mQdfC-L8Cmb
-
 * Copy the pull secret into this new namespace by running the following two commands
 
 ```bash
