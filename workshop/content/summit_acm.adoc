@@ -383,6 +383,7 @@ In order to deliver these policies we will need to leverage the RHACM Applicatio
 ** Under repository types, select the *GIT* repository
 ** *URL:*  https://github.com/levenhagen/demo-policygenerator[https://github.com/levenhagen/demo-policygenerator.git]
 ** *Branch*:  `main`
+** *Commit hash*: `c65bf8481a57cc0f919e01946e67fd30b3890c74`
 * Verify that *Deploy application resources on clusters with all specified labels* is selected and enter the following information
 ** *Cluster sets*: `default`
 ** *Label*: `local-cluster`
